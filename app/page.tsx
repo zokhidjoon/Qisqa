@@ -5,7 +5,8 @@ import { supabase, getRedirectUrl } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, FileSpreadsheet, Sparkles, History, Globe, Zap } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { Loader2, FileSpreadsheet, Sparkles, History, Globe, Zap, ArrowRight, CheckCircle } from "lucide-react"
 import { motion } from "framer-motion"
 
 interface Summary {
@@ -113,51 +114,56 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
+          className="flex flex-col items-center space-y-4"
         >
-          <Loader2 className="h-8 w-8 animate-spin text-[#007BFF]" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
         </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <motion.header
-        className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100"
+        className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40"
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <motion.div
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-3"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            <FileSpreadsheet className="h-7 w-7 text-[#007BFF]" />
-            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Qisqa</h1>
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <FileSpreadsheet className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Qisqa</h1>
           </motion.div>
 
           <motion.div
-            className="flex items-center space-x-4"
+            className="flex items-center space-x-3"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
+            <ThemeToggle />
             {session?.user ? (
               <>
-                <span className="text-sm text-gray-600 hidden sm:block font-medium">
+                <span className="text-sm text-muted-foreground hidden sm:block font-medium max-w-32 truncate">
                   {session.user.user_metadata?.name || session.user.email}
                 </span>
                 <Button
                   variant="ghost"
                   onClick={handleSignOut}
-                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 font-medium"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Chiqish
                 </Button>
@@ -165,7 +171,7 @@ export default function HomePage() {
             ) : (
               <Button
                 onClick={handleSignIn}
-                className="bg-[#007BFF] hover:bg-[#0056b3] text-white px-6 py-2 rounded-full font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Google bilan kirish
               </Button>
@@ -175,18 +181,38 @@ export default function HomePage() {
       </motion.header>
 
       <main>
-        <section className="pt-20 pb-32 px-6">
-          <div className="max-w-4xl mx-auto text-center">
+        <section className="pt-16 pb-24 px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto max-w-4xl text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="mb-12"
             >
-              <h1 className="text-5xl md:text-6xl font-semibold text-gray-900 mb-6 tracking-tight leading-tight">
-                Ma'lumotlaringizdan <span className="text-[#007BFF]">qisqa</span> va aniq hisobotlar
+              <motion.div
+                className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Sun'iy intellekt bilan tahlil
+              </motion.div>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 tracking-tight leading-tight">
+                Ma'lumotlaringizdan{" "}
+                <span className="text-primary relative">
+                  qisqa
+                  <motion.div
+                    className="absolute -bottom-2 left-0 right-0 h-1 bg-primary/20 rounded-full"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 1, duration: 0.8 }}
+                  />
+                </span>{" "}
+                va aniq hisobotlar
               </h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed font-light">
+              <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                 Google Sheet havolasini yuboring va Qisqa siz uchun tahlil natijasini qisqacha yozadi.
               </p>
             </motion.div>
@@ -198,43 +224,52 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
-                <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardContent className="p-8">
+                <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-6 sm:p-8">
                     <div className="space-y-6">
-                      <div>
+                      <div className="relative">
                         <Input
                           type="url"
                           placeholder="Google Sheet havolasini kiriting..."
                           value={sheetUrl}
                           onChange={(e) => setSheetUrl(e.target.value)}
-                          className="w-full py-4 px-4 text-base border-gray-200 rounded-lg focus:ring-2 focus:ring-[#007BFF] focus:border-transparent"
+                          className="w-full py-4 px-4 text-base border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background"
                         />
+                        {sheetUrl && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="absolute right-3 top-1/2 -translate-y-1/2"
+                          >
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          </motion.div>
+                        )}
                       </div>
 
                       {error && (
                         <motion.div
-                          className="p-4 bg-red-50 border border-red-200 rounded-lg"
+                          className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg"
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                         >
-                          <p className="text-red-700 text-sm">{error}</p>
+                          <p className="text-destructive text-sm font-medium">{error}</p>
                         </motion.div>
                       )}
 
                       {success && (
                         <motion.div
-                          className="p-4 bg-green-50 border border-green-200 rounded-lg"
+                          className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg"
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                         >
-                          <p className="text-green-700 text-sm">{success}</p>
+                          <p className="text-green-700 dark:text-green-400 text-sm font-medium">{success}</p>
                         </motion.div>
                       )}
 
                       <Button
                         onClick={generateReport}
                         disabled={generating || !sheetUrl.trim()}
-                        className="w-full bg-[#007BFF] hover:bg-[#0056b3] text-white py-4 text-base font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-4 text-base font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
                       >
                         {generating ? (
                           <>
@@ -242,7 +277,10 @@ export default function HomePage() {
                             Hisobot yaratilmoqda...
                           </>
                         ) : (
-                          "Hisobot yaratish"
+                          <>
+                            Hisobot yaratish
+                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                          </>
                         )}
                       </Button>
                     </div>
@@ -253,22 +291,22 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-24 bg-gradient-to-b from-gray-50/50 to-white">
-          <div className="max-w-6xl mx-auto px-6">
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
             <motion.div
-              className="text-center mb-20"
+              className="text-center mb-16"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-4xl font-semibold text-gray-900 mb-4 tracking-tight">Nima uchun Qisqa?</h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto font-light">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 tracking-tight">Nima uchun Qisqa?</h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Zamonaviy texnologiyalar yordamida ma'lumotlaringizni tez va aniq tahlil qiling
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {
                   icon: FileSpreadsheet,
@@ -303,17 +341,17 @@ export default function HomePage() {
                   transition={{ duration: 0.6, delay: feature.delay }}
                   viewport={{ once: true }}
                 >
-                  <Card className="h-full bg-white/70 backdrop-blur-sm border border-gray-200/50 shadow-sm hover:shadow-lg hover:bg-white/90 transition-all duration-300 group-hover:-translate-y-1">
+                  <Card className="h-full bg-card/50 backdrop-blur-sm border border-border/50 shadow-sm hover:shadow-lg hover:bg-card/80 transition-all duration-300 group-hover:-translate-y-2">
                     <CardContent className="p-6 text-center">
                       <motion.div
-                        className="w-12 h-12 bg-[#007BFF]/10 rounded-xl flex items-center justify-center mx-auto mb-4"
-                        whileHover={{ scale: 1.1 }}
+                        className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4"
+                        whileHover={{ scale: 1.1, rotate: 5 }}
                         transition={{ type: "spring", stiffness: 400, damping: 10 }}
                       >
-                        <feature.icon className="h-6 w-6 text-[#007BFF]" />
+                        <feature.icon className="h-6 w-6 text-primary" />
                       </motion.div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2 tracking-tight">{feature.title}</h3>
-                      <p className="text-sm text-gray-600 leading-relaxed font-light">{feature.description}</p>
+                      <h3 className="text-lg font-semibold text-foreground mb-2 tracking-tight">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -323,13 +361,13 @@ export default function HomePage() {
         </section>
 
         {session?.user && summaries.length > 0 && (
-          <section className="py-16 px-6">
-            <div className="max-w-4xl mx-auto">
+          <section className="py-16 px-4 sm:px-6 lg:px-8">
+            <div className="container mx-auto max-w-4xl">
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                <Card className="bg-white border border-gray-200 shadow-lg">
+                <Card className="bg-card border border-border shadow-lg">
                   <CardHeader className="pb-4">
                     <CardTitle className="flex items-center space-x-2 text-xl font-semibold">
-                      <History className="h-5 w-5 text-[#007BFF]" />
+                      <History className="h-5 w-5 text-primary" />
                       <span>Oxirgi hisobotlar</span>
                     </CardTitle>
                   </CardHeader>
@@ -338,20 +376,20 @@ export default function HomePage() {
                       {summaries.map((summary, index) => (
                         <motion.div
                           key={summary.id}
-                          className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200"
+                          className="p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-all duration-200 border border-border/50"
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
                         >
                           <div className="flex justify-between items-start mb-2">
-                            <p className="text-sm text-gray-600 truncate flex-1 mr-4 font-medium">
+                            <p className="text-sm text-muted-foreground truncate flex-1 mr-4 font-medium">
                               {summary.sheet_url}
                             </p>
-                            <span className="text-xs text-gray-500 whitespace-nowrap bg-white px-2 py-1 rounded-full">
+                            <span className="text-xs text-muted-foreground whitespace-nowrap bg-background px-2 py-1 rounded-full border border-border">
                               {new Date(summary.created_at).toLocaleDateString("uz-UZ")}
                             </span>
                           </div>
-                          <p className="text-gray-800 line-clamp-3 leading-relaxed text-sm">{summary.summary}</p>
+                          <p className="text-foreground line-clamp-3 leading-relaxed text-sm">{summary.summary}</p>
                         </motion.div>
                       ))}
                     </div>
@@ -363,8 +401,8 @@ export default function HomePage() {
         )}
       </main>
 
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-6xl mx-auto px-6">
+      <footer className="bg-muted/50 border-t border-border py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
           <motion.div
             className="text-center"
             initial={{ opacity: 0, y: 20 }}
@@ -372,12 +410,14 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <FileSpreadsheet className="h-6 w-6 text-white" />
-              <h3 className="text-xl font-semibold">Qisqa</h3>
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <FileSpreadsheet className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground">Qisqa</h3>
             </div>
-            <p className="text-gray-400 mb-4 font-light">Ma'lumotlaringizdan qisqa va aniq hisobotlar</p>
-            <p className="text-gray-500 text-sm">© 2025 Qisqa. Barcha huquqlar himoyalangan.</p>
+            <p className="text-muted-foreground mb-4">Ma'lumotlaringizdan qisqa va aniq hisobotlar</p>
+            <p className="text-muted-foreground/70 text-sm">© 2025 Qisqa. Barcha huquqlar himoyalangan.</p>
           </motion.div>
         </div>
       </footer>
