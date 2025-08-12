@@ -104,8 +104,19 @@ export default function HomePage() {
         throw new Error(data.error || "Hisobot yaratishda muammo yuz berdi.")
       }
 
-      setSuccess("Hisobot muvaffaqiyatli yaratildi!")
+      setSuccess(`Hisobot muvaffaqiyatli yaratildi! ${data.rowsAnalyzed} ta qator tahlil qilindi.`)
       setSheetUrl("")
+
+      if (data.summary) {
+        const newSummary: Summary = {
+          id: Date.now().toString(),
+          user_id: session.user.id,
+          sheet_url: sheetUrl,
+          summary: data.summary,
+          created_at: new Date().toISOString(),
+        }
+        setSummaries((prev) => [newSummary, ...prev.slice(0, 4)]) // Keep only 5 most recent
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
