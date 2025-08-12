@@ -85,18 +85,21 @@ export interface Summary {
 }
 
 export const getRedirectUrl = () => {
-  const productionUrl = "https://v0-qisqa-web-app.vercel.app"
-
-  // For development
-  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-    return "http://localhost:3000"
-  }
-
-  // For production - use the specific production URL
   if (typeof window !== "undefined") {
-    return process.env.NEXT_PUBLIC_SITE_URL || productionUrl
+    // In browser - detect environment more reliably
+    const isLocalhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname.includes("localhost")
+
+    if (isLocalhost) {
+      return `${window.location.protocol}//${window.location.host}`
+    } else {
+      // Production - use environment variable or current origin
+      return process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+    }
   }
 
-  // Fallback for server-side
-  return process.env.NEXT_PUBLIC_SITE_URL || productionUrl
+  // Server-side fallback
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://v0-qisqa-web-app.vercel.app"
 }
