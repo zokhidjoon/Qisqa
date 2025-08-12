@@ -94,6 +94,7 @@ export default function HomePage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ sheetUrl }),
       })
 
