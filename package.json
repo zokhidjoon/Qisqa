@@ -12,6 +12,7 @@
     "@ai-sdk/openai": "latest",
     "@emotion/is-prop-valid": "latest",
     "@radix-ui/react-slot": "^1.0.2",
+    "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "ai": "latest",
     "class-variance-authority": "^0.7.1",

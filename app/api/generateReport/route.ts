@@ -1,21 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { supabase } from "@/lib/supabaseClient"
+import { createServerSupabaseClient } from "@/lib/supabaseServer"
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization")
-    if (!authHeader) {
-      return NextResponse.json({ error: "Iltimos, avval tizimga kiring." }, { status: 401 })
-    }
+    const supabase = createServerSupabaseClient()
 
-    // Verify the session with Supabase
-    const token = authHeader.replace("Bearer ", "")
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser(token)
+    } = await supabase.auth.getUser()
 
     if (authError || !user) {
       return NextResponse.json({ error: "Iltimos, avval tizimga kiring." }, { status: 401 })
