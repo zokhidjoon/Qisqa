@@ -85,6 +85,9 @@ export interface Summary {
 }
 
 export const getRedirectUrl = () => {
+  // Use SITE_URL environment variable first
+  const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL
+
   if (typeof window !== "undefined") {
     // In browser - detect environment more reliably
     const isLocalhost =
@@ -95,11 +98,11 @@ export const getRedirectUrl = () => {
     if (isLocalhost) {
       return `${window.location.protocol}//${window.location.host}`
     } else {
-      // Production - use environment variable or current origin
-      return process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+      // Production - use SITE_URL or current origin
+      return siteUrl || window.location.origin
     }
   }
 
-  // Server-side fallback
-  return process.env.NEXT_PUBLIC_SITE_URL || "https://v0-qisqa-web-app.vercel.app"
+  // Server-side - use SITE_URL or fallback to Vercel URL
+  return siteUrl || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://v0-qisqa-web-app.vercel.app"
 }

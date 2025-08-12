@@ -1,16 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, getRedirectUrl, type Summary } from "@/lib/supabaseClient"
+import { supabase, getRedirectUrl } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, FileSpreadsheet, Sparkles, History, Globe, Zap } from "lucide-react"
-import type { User } from "@supabase/supabase-js"
 import { motion } from "framer-motion"
 
+interface Summary {
+  id: string
+  user_id: string
+  sheet_url: string
+  summary: string
+  created_at: string
+}
+
 export default function HomePage() {
-  const [user, setUser] = useState<User | null>(null)
+  const [session, setSession] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [sheetUrl, setSheetUrl] = useState("")
   const [generating, setGenerating] = useState(false)
@@ -19,48 +26,33 @@ export default function HomePage() {
   const [summaries, setSummaries] = useState<Summary[]>([])
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+    supabase.auth.getSession().then(({ data: { session } }: any) => {
+      setSession(session)
       setLoading(false)
-      if (session?.user) {
-        loadSummaries(session.user.id)
-      }
     })
 
-    // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        loadSummaries(session.user.id)
-      } else {
-        setSummaries([])
-      }
+    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      setSession(session)
+      setLoading(false)
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  const loadSummaries = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("summaries")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(5)
-
-    if (!error && data) {
-      setSummaries(data)
+  useEffect(() => {
+    if (session?.user) {
+      setSummaries([])
     }
-  }
+  }, [session])
 
-  const signInWithGoogle = async () => {
+  const handleSignIn = async () => {
+    const redirectUrl = getRedirectUrl()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: getRedirectUrl(),
+        redirectTo: redirectUrl,
       },
     })
     if (error) {
@@ -68,12 +60,16 @@ export default function HomePage() {
     }
   }
 
-  const signOut = async () => {
-    await supabase.auth.signOut()
-    setSheetUrl("")
-    setError("")
-    setSuccess("")
-    setSummaries([])
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      setError("Tizimdan chiqishda xatolik yuz berdi.")
+    } else {
+      setSheetUrl("")
+      setError("")
+      setSuccess("")
+      setSummaries([])
+    }
   }
 
   const generateReport = async () => {
@@ -82,7 +78,7 @@ export default function HomePage() {
       return
     }
 
-    if (!user) {
+    if (!session?.user) {
       setError("Iltimos, avval tizimga kiring.")
       return
     }
@@ -96,7 +92,6 @@ export default function HomePage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
         body: JSON.stringify({ sheetUrl }),
       })
@@ -107,10 +102,8 @@ export default function HomePage() {
         throw new Error(data.error || "Hisobot yaratishda muammo yuz berdi.")
       }
 
-      setSuccess("Hisobot muvaffaqiyatli yaratildi va jadvalga qo'shildi!")
+      setSuccess("Hisobot muvaffaqiyatli yaratildi!")
       setSheetUrl("")
-      // Reload summaries to show the new one
-      loadSummaries(user.id)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -156,14 +149,14 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            {user ? (
+            {session?.user ? (
               <>
                 <span className="text-sm text-gray-600 hidden sm:block font-medium">
-                  {user.user_metadata?.full_name || user.email}
+                  {session.user.user_metadata?.name || session.user.email}
                 </span>
                 <Button
                   variant="ghost"
-                  onClick={signOut}
+                  onClick={handleSignOut}
                   className="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 font-medium"
                 >
                   Chiqish
@@ -171,7 +164,7 @@ export default function HomePage() {
               </>
             ) : (
               <Button
-                onClick={signInWithGoogle}
+                onClick={handleSignIn}
                 className="bg-[#007BFF] hover:bg-[#0056b3] text-white px-6 py-2 rounded-full font-medium transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Google bilan kirish
@@ -198,7 +191,7 @@ export default function HomePage() {
               </p>
             </motion.div>
 
-            {user && (
+            {session?.user && (
               <motion.div
                 className="max-w-2xl mx-auto"
                 initial={{ opacity: 0, y: 40 }}
@@ -329,7 +322,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {user && summaries.length > 0 && (
+        {session?.user && summaries.length > 0 && (
           <section className="py-16 px-6">
             <div className="max-w-4xl mx-auto">
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>

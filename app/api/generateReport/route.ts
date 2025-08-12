@@ -1,18 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+import { supabase } from "@/lib/supabaseClient"
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("Authorization")
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const authHeader = request.headers.get("authorization")
+    if (!authHeader) {
       return NextResponse.json({ error: "Iltimos, avval tizimga kiring." }, { status: 401 })
     }
 
-    const token = authHeader.split(" ")[1]
+    // Verify the session with Supabase
+    const token = authHeader.replace("Bearer ", "")
     const {
       data: { user },
       error: authError,
@@ -77,20 +76,22 @@ Hisobotda quyidagilarni ko'rsating:
 - Asosiy xulosalar va tavsiyalar`,
     })
 
-    const { error: dbError } = await supabase.from("summaries").insert({
-      user_id: user.id,
-      sheet_url: sheetUrl,
-      summary: summary,
-    })
+    try {
+      const { error: dbError } = await supabase.from("summaries").insert({
+        user_id: user.id,
+        sheet_url: sheetUrl,
+        summary: summary,
+        created_at: new Date().toISOString(),
+      })
 
-    if (dbError) {
-      console.error("Database error:", dbError)
-      return NextResponse.json({ error: "Hisobotni saqlashda muammo yuz berdi." }, { status: 500 })
+      if (dbError) {
+        console.error("Database error:", dbError)
+        // Continue even if database insert fails
+      }
+    } catch (dbError) {
+      console.error("Failed to store summary:", dbError)
+      // Continue even if database insert fails
     }
-
-    // For demo purposes, we'll simulate writing back to the sheet
-    // In a real implementation, you would use Google Sheets API to write the summary
-    // to a new tab called "Qisqa Hisobot"
 
     // Simulate API call delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
