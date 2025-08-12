@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/contexts/auth-context"
 import "./globals.css"
 
 const inter = Inter({
@@ -32,7 +33,7 @@ export default function RootLayout({
     <html lang="uz" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+          <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
       </body>
     </html>

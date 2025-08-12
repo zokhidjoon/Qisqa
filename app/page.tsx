@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { supabase, getRedirectUrl } from "@/lib/supabaseClient"
+import { useState } from "react"
+import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,59 +18,19 @@ interface Summary {
 }
 
 export default function HomePage() {
-  const [session, setSession] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const { session, user, loading, signIn, signOut } = useAuth()
   const [sheetUrl, setSheetUrl] = useState("")
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [summaries, setSummaries] = useState<Summary[]>([])
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }: any) => {
-      setSession(session)
-      setLoading(false)
-    })
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setSession(session)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  useEffect(() => {
-    if (session?.user) {
-      setSummaries([])
-    }
-  }, [session])
-
-  const handleSignIn = async () => {
-    const redirectUrl = getRedirectUrl()
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: redirectUrl,
-      },
-    })
-    if (error) {
-      setError("Tizimga kirishda xatolik yuz berdi.")
-    }
-  }
-
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      setError("Tizimdan chiqishda xatolik yuz berdi.")
-    } else {
-      setSheetUrl("")
-      setError("")
-      setSuccess("")
-      setSummaries([])
-    }
+    await signOut()
+    setSheetUrl("")
+    setError("")
+    setSuccess("")
+    setSummaries([])
   }
 
   const generateReport = async () => {
@@ -79,7 +39,7 @@ export default function HomePage() {
       return
     }
 
-    if (!session?.user) {
+    if (!user) {
       setError("Iltimos, avval tizimga kiring.")
       return
     }
@@ -110,12 +70,12 @@ export default function HomePage() {
       if (data.summary) {
         const newSummary: Summary = {
           id: Date.now().toString(),
-          user_id: session.user.id,
+          user_id: user.id,
           sheet_url: sheetUrl,
           summary: data.summary,
           created_at: new Date().toISOString(),
         }
-        setSummaries((prev) => [newSummary, ...prev.slice(0, 4)]) // Keep only 5 most recent
+        setSummaries((prev) => [newSummary, ...prev.slice(0, 4)])
       }
     } catch (err: any) {
       setError(err.message)
@@ -167,10 +127,10 @@ export default function HomePage() {
             transition={{ delay: 0.3 }}
           >
             <ThemeToggle />
-            {session?.user ? (
+            {user ? (
               <>
                 <span className="text-sm text-muted-foreground hidden sm:block font-medium max-w-32 truncate">
-                  {session.user.user_metadata?.name || session.user.email}
+                  {user.user_metadata?.name || user.email}
                 </span>
                 <Button
                   variant="ghost"
@@ -182,7 +142,7 @@ export default function HomePage() {
               </>
             ) : (
               <Button
-                onClick={handleSignIn}
+                onClick={signIn}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Google bilan kirish
@@ -229,7 +189,7 @@ export default function HomePage() {
               </p>
             </motion.div>
 
-            {session?.user && (
+            {user && (
               <motion.div
                 className="max-w-2xl mx-auto"
                 initial={{ opacity: 0, y: 40 }}
@@ -372,7 +332,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {session?.user && summaries.length > 0 && (
+        {user && summaries.length > 0 && (
           <section className="py-16 px-4 sm:px-6 lg:px-8">
             <div className="container mx-auto max-w-4xl">
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
