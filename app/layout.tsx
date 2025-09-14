@@ -1,41 +1,13 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/contexts/auth-context"
-import "./globals.css"
+import './globals.css';
+import { Header } from '../components/Header';
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-})
-
-export const metadata: Metadata = {
-  title: "Qisqa - Ma'lumotlaringizdan qisqa va aniq hisobotlar",
-  description: "Google Sheet havolasini yuboring va Qisqa siz uchun tahlil natijasini qisqacha yozadi.",
-  keywords: ["Google Sheets", "AI", "Tahlil", "Hisobot", "O'zbek tili"],
-  authors: [{ name: "Qisqa Team" }],
-  openGraph: {
-    title: "Qisqa - Ma'lumotlaringizdan qisqa va aniq hisobotlar",
-    description: "Google Sheet havolasini yuboring va Qisqa siz uchun tahlil natijasini qisqacha yozadi.",
-    type: "website",
-  },
-    generator: 'v0.dev'
-}
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="uz" className={inter.variable} suppressHydrationWarning>
-      <body className="font-sans antialiased">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <AuthProvider>{children}</AuthProvider>
-        </ThemeProvider>
+    <html lang="en" className="h-full">
+      <body className="app-surface min-h-screen">
+        <Header />
+        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">{children}</main>
       </body>
     </html>
-  )
+  );
 }
